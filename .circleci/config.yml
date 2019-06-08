@@ -1,0 +1,41 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6-stretch
+    working_directory: /tmp/luckcdn
+    steps:
+      - checkout
+      - run: python generate-index.py
+      - persist_to_workspace:
+          root: /tmp/wiki
+          paths: 
+            - data/*
+  deploy:
+    docker:
+      - image: circleci/node:8
+    working_directory: /tmp/luckcdn
+    steps:
+      - checkout
+      - run: npm install
+      - run:
+          name: 'Install Dependecies'
+          command: npm install --save-dev firebase-tools
+      - attach_workspace:
+          at: /tmp/luckcdn
+      - run:
+          name: 'Deploy to Hosting'
+          command: node_modules/.bin/firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID" --token "$FIREBASE_TOKEN"
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
