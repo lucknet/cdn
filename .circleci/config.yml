@@ -12,7 +12,7 @@ jobs:
       - checkout
       - run: python generate-index.py
       - persist_to_workspace:
-          root: /tmp/wiki
+          root: /tmp/luckcdn
           paths: 
             - data/*
   deploy:
